@@ -132,6 +132,7 @@ std::optional<CompilationError> Analyser::analyseVariableDeclaration() {
     next = nextToken();
     if (next.has_value() && next.value().GetType() == TokenType::EQUAL_SIGN){
       // '<表达式>'
+      initialized = true;
       auto err = analyseExpression();
       if (err.has_value()) return err;
     }
@@ -415,7 +416,9 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       auto ident = next.value().GetValueString();
       if (!isDeclared(ident))
         return {CompilationError(_current_pos, ErrorCode::ErrNotDeclared)};
-      if (!isInitializedVariable(ident) && !isConstant(ident))
+      // std::cout << "ident: " << ident << "\n";
+      // std::cout << "init: " << isInitializedVariable(ident) << "\n";
+      if (!isInitializedVariable(ident))
         return {CompilationError(_current_pos,ErrorCode::ErrNotInitialized)};
       _instructions.emplace_back(Operation::LOD, getIndex(ident));
       break;
