@@ -218,7 +218,13 @@ std::optional<CompilationError> Analyser::analyseConstantExpression(
     }
   }
   else if(next.value().GetType() == TokenType::UNSIGNED_INTEGER){
-    out = out*(int32_t)std::any_cast<int32_t>(next.value().GetValue());
+    try{
+      out = out*std::stoi(next.value().GetValueString());
+    }
+    catch(std::out_of_range &e){
+      return std::make_optional<CompilationError>(
+        _current_pos, ErrorCode::ErrIntegerOverflow);
+    }
   }
   return {};
 }
@@ -411,8 +417,13 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       break;
     }
     case TokenType::UNSIGNED_INTEGER:{
-      int32_t val = std::any_cast<int32_t>(next.value().GetValue());
-      _instructions.emplace_back(Operation::LIT, val);
+      try{
+        int32_t val = std::stoi(next.value().GetValueString());
+        _instructions.emplace_back(Operation::LIT, val);
+      }
+      catch(std::out_of_range &e){
+        return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrIntegerOverflow);
+      }
       break;
     }
     case TokenType::LEFT_BRACKET:{

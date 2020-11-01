@@ -155,13 +155,7 @@ Tokenizer::nextToken() {
         //     解析成功则返回无符号整数类型的token，否则返回编译错误
         if (!current_char.has_value()){
           if(isUnsignedDigit(ss.str())){
-            try{
-                int32_t val = std::stoi(ss.str());
-                return std::make_pair(std::make_optional<Token>(TokenType::UNSIGNED_INTEGER,val,pos,currentPos()),std::nullopt);
-              }
-            catch(std::out_of_range){
-              return std::make_pair(std::optional<Token>(),std::make_optional<CompilationError>(pos,ErrorCode::ErrIntegerOverflow));
-            }
+            return std::make_pair(std::make_optional<Token>(TokenType::UNSIGNED_INTEGER,ss.str(),pos,currentPos()),std::nullopt);
           }
           else{
             return std::make_pair(std::optional<Token>(),std::make_optional<CompilationError>(pos,ErrorCode::ErrInvalidInput));
@@ -175,13 +169,7 @@ Tokenizer::nextToken() {
           else{
             unreadLast();
             if(isUnsignedDigit(ss.str())){
-              try{
-                int32_t val = std::stoi(ss.str());
-                return std::make_pair(std::make_optional<Token>(TokenType::UNSIGNED_INTEGER,val,pos,currentPos()),std::nullopt);
-              }
-              catch(std::out_of_range){
-                return std::make_pair(std::optional<Token>(),std::make_optional<CompilationError>(pos,ErrorCode::ErrIntegerOverflow));
-              }
+              return std::make_pair(std::make_optional<Token>(TokenType::UNSIGNED_INTEGER,ss.str(),pos,currentPos()),std::nullopt);
             }
             else{
               return std::make_pair(std::optional<Token>(),std::make_optional<CompilationError>(pos,ErrorCode::ErrInvalidInput));
