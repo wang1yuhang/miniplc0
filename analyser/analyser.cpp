@@ -218,9 +218,12 @@ std::optional<CompilationError> Analyser::analyseConstantExpression(
     }
     next = nextToken();
   }
-  else if(next.value().GetType() == TokenType::UNSIGNED_INTEGER){
+  if(next.value().GetType() == TokenType::UNSIGNED_INTEGER){
+      // std::cout << next.value().GetValueString() << std::endl;
+      // std::cout << std::stoi(next.value().GetValueString()) << std::endl;
     try{
       out = out*std::stoi(next.value().GetValueString());
+      // std::cout << out << std::endl;
     }
     catch(std::out_of_range &e){
       return std::make_optional<CompilationError>(
