@@ -216,6 +216,7 @@ std::optional<CompilationError> Analyser::analyseConstantExpression(
     if(next.value().GetType() == TokenType::MINUS_SIGN){
       out = -1;
     }
+    next = nextToken();
   }
   else if(next.value().GetType() == TokenType::UNSIGNED_INTEGER){
     try{
