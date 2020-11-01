@@ -418,7 +418,7 @@ std::optional<CompilationError> Analyser::analyseFactor() {
         return {CompilationError(_current_pos, ErrorCode::ErrNotDeclared)};
       // std::cout << "ident: " << ident << "\n";
       // std::cout << "init: " << isInitializedVariable(ident) << "\n";
-      if (!isInitializedVariable(ident))
+      if (!isInitializedVariable(ident) && !isConstant(ident))
         return {CompilationError(_current_pos,ErrorCode::ErrNotInitialized)};
       _instructions.emplace_back(Operation::LOD, getIndex(ident));
       break;
