@@ -188,7 +188,7 @@ std::optional<CompilationError> Analyser::analyseStatementSequence() {
         break;
       }
       case  TokenType::SEMICOLON:{
-        next = nextToken();
+        // next = nextToken();
         break;
       }
       default:
@@ -209,7 +209,9 @@ std::optional<CompilationError> Analyser::analyseConstantExpression(
   // 同时要注意是否溢出
   out = 1;
   auto next = nextToken();
-  if(!next.has_value()) return{};
+  if(!next.has_value())
+    return std::make_optional<CompilationError>(
+        _current_pos, ErrorCode::ErrIncompleteExpression);
   if(next.value().GetType() == TokenType::PLUS_SIGN || next.value().GetType() == TokenType::MINUS_SIGN){
     if(next.value().GetType() == TokenType::MINUS_SIGN){
       out = -1;
@@ -290,8 +292,8 @@ std::optional<CompilationError> Analyser::analyseAssignmentStatement() {
     if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
       return std::make_optional<CompilationError>(_current_pos,
                                                   ErrorCode::ErrNoSemicolon);
-  _instructions.emplace_back(Operation::STO, index);
   if (!isInitializedVariable(name)) makeInitialized(name);
+  _instructions.emplace_back(Operation::STO, index);
   return {};
 }
 
@@ -343,11 +345,11 @@ std::optional<CompilationError> Analyser::analyseItem() {
     if(!next.has_value()){
       break;
     }
-    else if(next.value().GetType() != TokenType::MULTIPLICATION_SIGN){
+    else if(next.value().GetType() != TokenType::MULTIPLICATION_SIGN&&next.value().GetType() != TokenType::DIVISION_SIGN){
       unreadToken();
       break;
     }
-    type = TokenType::MULTIPLICATION_SIGN;
+    type = next.value().GetType();
     // <因子>
     auto err = analyseFactor();
     if (err.has_value()) return err;
@@ -357,6 +359,7 @@ std::optional<CompilationError> Analyser::analyseItem() {
     else if (type == TokenType::DIVISION_SIGN)
       _instructions.emplace_back(Operation::DIV, 0);
   }
+  return {};
 }
 
 // <因子> ::= [<符号>]( <标识符> | <无符号整数> | '('<表达式>')' )
@@ -399,9 +402,17 @@ std::optional<CompilationError> Analyser::analyseFactor() {
     // int32_t val = /* 值 */;
     // _instructions.emplace_back(Operation::LIT, val);
     case TokenType::IDENTIFIER:{
+      auto ident = next.value().GetValueString();
+      if (!isDeclared(ident))
+        return {CompilationError(_current_pos, ErrorCode::ErrNotDeclared)};
+      if (!isInitializedVariable(ident) && !isConstant(ident))
+        return {CompilationError(_current_pos,ErrorCode::ErrNotInitialized)};
+      _instructions.emplace_back(Operation::LOD, getIndex(ident));
       break;
     }
     case TokenType::UNSIGNED_INTEGER:{
+      int32_t val = std::any_cast<int32_t>(next.value().GetValue());
+      _instructions.emplace_back(Operation::LIT, val);
       break;
     }
     case TokenType::LEFT_BRACKET:{
