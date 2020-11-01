@@ -189,7 +189,7 @@ std::optional<CompilationError> Analyser::analyseStatementSequence() {
         break;
       }
       case  TokenType::SEMICOLON:{
-        // next = nextToken();
+        next = nextToken();
         break;
       }
       default:
@@ -434,7 +434,7 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       break;
     }
     case TokenType::LEFT_BRACKET:{
-      break;
+      
       auto err = analyseExpression();
       if (err.has_value()) return err;
       // ')'
@@ -442,6 +442,7 @@ std::optional<CompilationError> Analyser::analyseFactor() {
       if (!next.has_value() || next.value().GetType() != TokenType::RIGHT_BRACKET)
         return std::make_optional<CompilationError>(_current_pos,
                                                     ErrorCode::ErrInvalidPrint);
+      break;
     }
     default:
       return std::make_optional<CompilationError>(
